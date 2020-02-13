@@ -4,6 +4,7 @@ import sys
 import pypeliner
 import pypeliner.managed as mgd
 from wgs.utils import helpers
+from wgs.workflows import hmmcopy
 from wgs.workflows import titan
 
 
@@ -66,12 +67,26 @@ def copynumber_calling_workflow(args):
         kwargs={'single_node': args['single_node']}
     )
 
-    filenames = [titan_segments_filename, 
-            titan_params_filename, 
-            titan_markers_filename]
-   
+    workflow.subworkflow(
+        name='hmmcopy',
+        func=hmmcopy.create_hmmcopy_workflow,
+        axes=('sample_id',),
+        args=(
+            mgd.InputFile("normal.bam", 'sample_id', fnames=normals,
+                          extensions=['.bai'], axes_origin=[]),
+            cna_outdir,
+            config,
+            mgd.InputInstance('sample_id'),
+        ),
+        kwargs={'single_node': args['single_node']}
+    )
+
+    filenames = [titan_segments_filename,
+                 titan_params_filename,
+                 titan_markers_filename]
+
     outputted_filenames = helpers.expand_list(filenames, samples, "sample_id")
- 
+
     workflow.transform(
         name='generate_meta_files_results',
         func='wgs.utils.helpers.generate_and_upload_metadata',
