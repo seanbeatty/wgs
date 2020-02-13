@@ -75,10 +75,10 @@ def copynumber_calling_workflow(args):
             mgd.InputFile("normal.bam", 'sample_id', fnames=normals,
                           extensions=['.bai'], axes_origin=[]),
             cna_outdir,
+            global_config,
             config,
             mgd.InputInstance('sample_id'),
         ),
-        kwargs={'single_node': args['single_node']}
     )
 
     filenames = [titan_segments_filename,

@@ -3,9 +3,10 @@ import os
 import pypeliner
 import pypeliner.managed as mgd
 import tasks
+from wgs.utils import helpers
 
 
-def create_hmmcopy_workflow(bam_file, out_dir, config, sample_id):
+def create_hmmcopy_workflow(bam_file, out_dir, global_config, config, sample_id):
     bias_plots_pdf = os.path.join(out_dir, 'plots', '{sample_id}_bias.pdf')
     correction_plots_pdf = os.path.join(out_dir, 'plots', '{sample_id}_correction.pdf')
     hmmcopy_plots_pdf = os.path.join(out_dir, 'plots', '{sample_id}_hmmcopy.pdf')
@@ -16,6 +17,9 @@ def create_hmmcopy_workflow(bam_file, out_dir, config, sample_id):
 
     workflow.transform(
         name='hmmcopy_readcounter',
+        ctx=helpers.get_default_ctx(
+            memory=global_config['memory']['low'],
+            walltime='2:00', ),
         func=tasks.hmmcopy_readcounter,
         args=(
             mgd.InputFile('input.bam', fnames=bam_file),
@@ -32,7 +36,8 @@ def create_hmmcopy_workflow(bam_file, out_dir, config, sample_id):
             mgd.TempOutputFile('infile_copy.txt'),
             mgd.TempOutputFile('infile_copy.obj'),
             config,
-        )
+        ),
+        kwargs={'docker_image': config['docker']['hmmcopy']}
     )
 
     workflow.transform(
@@ -46,7 +51,8 @@ def create_hmmcopy_workflow(bam_file, out_dir, config, sample_id):
             mgd.OutputFile(tumour_table_out),
             mgd.InputInstance('sample_id'),
             config,
-        )
+        ),
+        kwargs={'docker_image': config['docker']['hmmcopy']}
     )
 
     workflow.transform(
@@ -60,7 +66,8 @@ def create_hmmcopy_workflow(bam_file, out_dir, config, sample_id):
             mgd.OutputFile(bias_plots_pdf),
             mgd.OutputFile(correction_plots_pdf),
             mgd.OutputFile(hmmcopy_plots_pdf),
-        )
+        ),
+        kwargs={'docker_image': config['docker']['hmmcopy']}
     )
 
     workflow.transform(

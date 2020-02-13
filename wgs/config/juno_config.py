@@ -170,6 +170,7 @@ def juno_config(reference, containers):
         'docker': {
             'wgs': docker_containers['wgs'],
             'titan': docker_containers['titan'],
+            'hmmcopy': docker_containers['hmmcopy'],
             'vizutils': docker_containers['vizutils'],
             'mutationseq': docker_containers['mutationseq'],
             'vcftools': docker_containers['vcftools'],

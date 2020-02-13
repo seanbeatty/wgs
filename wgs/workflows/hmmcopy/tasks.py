@@ -4,6 +4,8 @@ import pypeliner
 
 from wgs.utils import helpers
 from wgs.utils import pdfutils
+from scripts import ReadCounter
+from scripts import PygeneAnnotation
 
 
 scripts = os.path.join(
@@ -13,20 +15,11 @@ scripts = os.path.join(
 
 
 def hmmcopy_readcounter(input_bam, output_wig, config):
-    chromosomes = ['--chromosomes'] + config['hmmcopy_readcounter']['chromosomes']
-
-    cmd = [
-              'python',
-              os.path.join(scripts, 'read_counter.py'),
-              input_bam,
-              output_wig,
-              '-w',
-              str(config['hmmcopy_readcounter']['w']),
-              '-m',
-              str(config['hmmcopy_readcounter']['m']),
-          ] + chromosomes
-
-    helpers.run_cmd(cmd, output=output_wig)
+    rc = ReadCounter(
+        input_bam, output_wig, config['readcounter']['w'],
+        config['chromosomes'], config['readcounter']['q'],
+    )
+    rc.main()
 
 
 def calc_corr(input_wig, output_file, output_obj, config):
@@ -124,15 +117,6 @@ def plot_hmm(
 
 
 def annot_hmm(input_segments, output_file, config):
-    cmd = [
-        'python',
-        os.path.join(scripts, 'pygene_annotation.py'),
-        '--gene_sets_gtf',
-        config['annot_hmm']['gtf'],
-        '--outfile',
-        output_file,
-        '--infile',
-        input_segments,
-    ]
-
-    pypeliner.commandline.execute(*cmd)
+    gene_sets_gtf = config['pygenes_gtf']
+    annotator = PygeneAnnotation(infile, outfile, gtf=gene_sets_gtf)
+    annotator.write_output()
